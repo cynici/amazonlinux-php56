@@ -347,10 +347,13 @@ RUN \
  export COMPOSER_HOME=/root && /usr/bin/composer.phar self-update && \
  ln -f -s /usr/lib64/libfbclient.so.2.5.4 /usr/lib64/libfbclient.so.2 && \
  ln -f -s /usr/lib64/libfbclient.so.2 /usr/lib64/libfbclient.so && \
- pecl channel-update pecl.php.net && \
- pecl install grpc && \
- pecl install protobuf && \
- wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && \
+ pecl channel-update pecl.php.net
+
+RUN pecl install grpc
+
+RUN pecl install -f protobuf-3.12.4
+
+RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && \
  tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && \
  rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && \
  git clone https://github.com/ncopa/su-exec.git /tmp/su-exec && \
@@ -365,7 +368,12 @@ RUN wget -q -O /usr/bin/anrp https://raw.githubusercontent.com/acacia-cloud/anrp
 # Merge addition and modification into existing /etc/
 COPY ./etc /etc
 
-COPY ./downloads/*.so /usr/lib64/php/5.6/modules/
+COPY ./downloads/interbase.so /usr/lib64/php/5.6/modules/interbase.so
+COPY ./downloads/pdo.so /usr/lib64/php/5.6/modules/pdo.so
+COPY ./downloads/pdo_firebird.so /usr/lib64/php/5.6/modules/pdo_firebird.so
+COPY ./downloads/libfbclient.so.2.5.4 /usr/lib64/libfbclient.so.2.5.4
 
 COPY ./downloads/s3fs-fuse-1.79-1.amzn1.x86_64.rpm /tmp/
-RUN yum install -y /tmp/s3fs-fuse-1.79-1.amzn1.x86_64.rpm
+
+RUN yum install -y /tmp/s3fs-fuse-1.79-1.amzn1.x86_64.rpm && \
+    update-ca-trust
